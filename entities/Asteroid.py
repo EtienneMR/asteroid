@@ -5,13 +5,15 @@ from utils.consts import SCREEN_SIZE
 from random import randint
 
 class Asteroid(BaseEntity):
-    def __init__(self, position: "Vector2", rotation: float, linvelocity: float, rotvelocity: float):
-        super().__init__(position, load_sprite_alpha("asteroid"))
+    def __init__(self, position: "Vector2", angle: float, lin_velocity: float, ang_velocity: float):
+        super().__init__(
+            sprite=load_sprite_alpha("asteroid"),
+            position=position,
+            angle=angle,
+            ang_velocity=ang_velocity,
+        )
         
-        self.destroyed = False
-        self.rotation = rotation
-        self.velocity = self.orientation * linvelocity
-        self.rotvelocity = rotvelocity
+        self.velocity = self.orientation * lin_velocity
         
     def tick(self, deltaTime: float):
         super().tick(deltaTime)
