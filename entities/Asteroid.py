@@ -1,8 +1,11 @@
-from pygame import Vector2
-from entities.BaseEntity import BaseEntity
-from utils.image import load_sprite_alpha
-from utils.consts import SCREEN_SIZE
 from random import randint
+
+from pygame import Vector2
+
+from entities.BaseEntity import BaseEntity
+from utils.consts import SCREEN_SIZE
+from utils.image import load_sprite_alpha
+
 
 class Asteroid(BaseEntity):
     def __init__(self, position: "Vector2", angle: float, lin_velocity: float, ang_velocity: float):

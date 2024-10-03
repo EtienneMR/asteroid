@@ -1,11 +1,14 @@
 from typing import Optional
+
 from pygame import Surface
 from pygame.math import Vector2
 from pygame.transform import rotozoom
 
+from classes.IRenderable import IRenderable
 from utils.consts import SCREEN_SIZE
 
-class BaseEntity:
+
+class BaseEntity(IRenderable):
     """
     Classe BaseEntity, représente une entitée du jeu.
     N'a pas beaucoup d'utilité seule mais peut être héritée.

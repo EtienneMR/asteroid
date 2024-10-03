@@ -1,7 +1,9 @@
 from pygame import Vector2, transform
+
 from entities.BaseEntity import BaseEntity
 from utils.consts import SCREEN_SIZE
 from utils.image import load_sprite_alpha
+
 
 class SpaceShip(BaseEntity):
     """

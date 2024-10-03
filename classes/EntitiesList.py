@@ -1,18 +1,20 @@
-from pygame import Surface
-from entities.BaseEntity import BaseEntity
-from typing import Generic, TypeVar
+from typing import Generic, List, Optional, TypeVar
 
-EntityType = TypeVar("EntityType", bound=BaseEntity)
+from pygame import Surface
+
+from classes.IRenderable import IRenderable
+
+EntityType = TypeVar("EntityType", bound=IRenderable)
 
 class EntitiesList(Generic[EntityType]):
     """
     Classe EntitiesList, représente une liste de BaseEntity.
     """
-    def __init__(self) -> None:
+    def __init__(self, list: Optional[List[EntityType]]) -> None:
         """
         Initialise la liste d'entitées.
         """
-        self._entities: list[EntityType] = []
+        self._entities: List[EntityType] = list or []
 
     def __iter__(self):
         """
@@ -25,6 +27,10 @@ class EntitiesList(Generic[EntityType]):
         Permet l'accès a la longueur.
         """
         return len(self._entities)
+    
+    @property
+    def alive(self):
+        return True
 
     def append(self, entity: EntityType):
         """
@@ -44,8 +50,10 @@ class EntitiesList(Generic[EntityType]):
         Met a jour toutes les entitées de la liste puis ne garde que les entitées en vie.
         """
         filtered = []
+
         for entity in self._entities:
             entity.tick(deltaTime)
             if entity.alive:
                 filtered.append(entity)
+        
         self._entities = filtered
