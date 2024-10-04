@@ -49,11 +49,8 @@ class EntitiesList(Generic[EntityType]):
         """
         Met a jour toutes les entitées de la liste puis ne garde que les entitées en vie.
         """
-        filtered = []
 
         for entity in self._entities:
             entity.tick(deltaTime)
-            if entity.alive:
-                filtered.append(entity)
         
-        self._entities = filtered
+        self._entities = list(filter(lambda e: e.alive, self._entities))

@@ -7,10 +7,11 @@ from classes.UserInterface import UserInterface
 from entities.Asteroid import Asteroid
 from entities.Missile import Bullet
 from entities.SpaceShip import SpaceShip
+from utils.assets import load_sound, load_sprite
 from utils.consts import SCREEN_SIZE
-from utils.image import load_sprite
 
 GAME_CAPTION = "Asteroids"
+GOD_TIME = 5.0
 
 
 class Game:
@@ -30,13 +31,19 @@ class Game:
         self.background = load_sprite("space")
         self.clock = pygame.time.Clock()
         self.userInterface = UserInterface()
-        self.spaceship = SpaceShip()
+        self.spaceship = SpaceShip(GOD_TIME)
         self.asteroids: EntitiesList[Asteroid] = EntitiesList(None)
         self.bullets: EntitiesList[Bullet] = EntitiesList(None)
         self.entities: EntitiesList[Any] = EntitiesList(
-            [self.spaceship, self.asteroids, self.bullets, self.userInterface]
+            [self.bullets, self.spaceship, self.asteroids, self.userInterface]
         )
         self.space_down_last_frame = False
+
+        self.sound_explosion = load_sound("explosion.mp3")
+        self.sound_laser = load_sound("laser.wav", 0.5)
+
+        self.sound_acc = load_sound("acceleration.mp3")
+        self.sound_state = False
 
     @property
     def level(self):
@@ -52,11 +59,11 @@ class Game:
         """
         while True:
             deltaTime = self.clock.tick(60) / 1000
-            self._handle_input()
-            self._process_game_logic(deltaTime)
-            self._draw()
+            self.handle_input()
+            self.tick(deltaTime)
+            self.draw(self.screen)
 
-    def _handle_input(self: "Game"):
+    def handle_input(self: "Game"):
         """
         Gère les évènements émits par les utilisateurs.
         """
@@ -75,7 +82,12 @@ class Game:
             rot -= 1
         if pressed_keys[pygame.K_LEFT]:
             rot += 1
-        if pressed_keys[pygame.K_SPACE] and not self.space_down_last_frame:
+        if (
+            pressed_keys[pygame.K_SPACE]
+            and not self.space_down_last_frame
+            and self.spaceship.alive
+        ):
+            self.sound_laser.play()
             self.bullets.append(
                 Bullet(
                     self.spaceship.position,
@@ -89,21 +101,51 @@ class Game:
         self.spaceship.acceleration_input = accel
         self.spaceship.rotate_input = rot
 
-    def _process_game_logic(self: "Game", deltaTime: float):
+        should_play_sound = accel > 0
+        if self.sound_state != should_play_sound:
+            if should_play_sound > 0:
+                self.sound_acc.play()
+            else:
+                self.sound_acc.fadeout(1000)
+            self.sound_state = should_play_sound
+
+    def tick(self: "Game", deltaTime: float):
         """
         Fait avancer la logique du jeu, notamment les entitées utilisées et l'apparition d'asteroids.
         """
         self.entities.tick(deltaTime)
 
-        if len(self.asteroids) == 0:
+        if len(self.asteroids) == 0 and self.spaceship.god_time == 0:
             self.level += 1
-            for _ in range(self.level ** 2):
-                self.asteroids.append(Asteroid.random())
+            for _ in range(self.level**2):
+                self.asteroids.append(Asteroid.random(1.0))
 
-    def _draw(self: "Game"):
+        for asteroid in self.asteroids:
+            if (
+                self.spaceship.god_time == 0.0
+                and self.spaceship.alive
+                and asteroid.collides_with(self.spaceship)
+            ):
+                self.sound_explosion.play()
+                if self.userInterface.lives <= 0:
+                    self.spaceship.alive = False
+                else:
+                    self.userInterface.lives -= 1
+                    self.spaceship.god_time += GOD_TIME
+
+            for bullet in self.bullets:
+                if bullet.alive and asteroid.collides_with(bullet):
+                    self.sound_explosion.play()
+                    bullet.alive = False
+                    if asteroid.breakable:
+                        self.asteroids.append(asteroid.split())
+                    else:
+                        asteroid.alive = False
+
+    def draw(self: "Game", surface: pygame.Surface):
         """
         Affiche le jeu ainsi que les entitées utilisées.
         """
         self.screen.blit(self.background, (0, 0))
-        self.entities.draw(self.screen)
+        self.entities.draw(surface)
         pygame.display.flip()

@@ -13,7 +13,16 @@ class BaseEntity(IRenderable):
     Classe BaseEntity, représente une entitée du jeu.
     N'a pas beaucoup d'utilité seule mais peut être héritée.
     """
-    def __init__(self, sprite: Optional[Surface], position: Vector2 = Vector2(0,0), angle: float = 0, velocity: Vector2 = Vector2(0, 0), ang_velocity: float = 0):
+
+    def __init__(
+        self,
+        sprite: Optional[Surface],
+        position: Vector2 = Vector2(0, 0),
+        angle: float = 0,
+        velocity: Vector2 = Vector2(0, 0),
+        ang_velocity: float = 0,
+        scale: float = 1.0,
+    ):
         """
         Initialise la BaseEntity
         """
@@ -22,6 +31,7 @@ class BaseEntity(IRenderable):
         self.velocity = Vector2(velocity)
         self.ang_velocity = ang_velocity
         self.alive = True
+        self.scale = scale
 
         if sprite is not None:
             self.sprite = sprite
@@ -29,29 +39,29 @@ class BaseEntity(IRenderable):
     @property
     def radius(self) -> float:
         """
-        Récupère le rayon du cercle autour de cet entitée.
+        Récupère le rayon du cercle autour de cette entitée.
         """
-        return max(self.sprite.get_width(), self.sprite.get_height()) / 2
-    
+        return max(self.sprite.get_width(), self.sprite.get_height()) / 2 * self.scale
+
     @property
     def orientation(self):
         """
-        Renvoie le Vector2 représentation la direction de cet entitée.
+        Renvoie le Vector2 représentation la direction de cette entitée.
         """
         return Vector2.from_polar((1, -self.angle))
 
     def draw(self, surface: Surface):
         """
-        Dessine cet entitée.
+        Dessine cette entitée.
         """
-        rotated_surface = rotozoom(self.sprite, self.angle, 1.0)
+        rotated_surface = rotozoom(self.sprite, self.angle, self.scale)
         rotated_surface_size = Vector2(rotated_surface.get_size())
         blit_position = self.position - rotated_surface_size * 0.5
         surface.blit(rotated_surface, blit_position)
 
     def tick(self, deltaTime: float):
         """
-        Met a jour la position et l'angle de cet entitée
+        Met a jour la position et l'angle de cette entitée
         """
         self.position += self.velocity * deltaTime
         self.angle += self.ang_velocity * deltaTime
@@ -62,10 +72,14 @@ class BaseEntity(IRenderable):
         width = self.sprite.get_width()
         height = self.sprite.get_height()
 
-        self.position.x = (self.position.x + width/2) % (SCREEN_SIZE[0] + width) - width/2
-        self.position.y = (self.position.y + height/2) % (SCREEN_SIZE[1] + height) - height/2
+        self.position.x = (self.position.x + width / 2) % (
+            SCREEN_SIZE[0] + width
+        ) - width / 2
+        self.position.y = (self.position.y + height / 2) % (
+            SCREEN_SIZE[1] + height
+        ) - height / 2
 
-    def collides_with(self, other_obj: "BaseEntity"):
+    def collides_with(self, other_obj: "BaseEntity") -> bool:
         """
         Vérifie si cet entitée est en contact avec une autre entitée.
         """
