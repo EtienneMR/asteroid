@@ -1,7 +1,7 @@
 from pygame import Rect, Surface, Vector2
 
 from entities.BaseEntity import BaseEntity
-from utils.assets import load_sprite_alpha
+from utils.assets import load_sound, load_sprite_alpha
 from utils.consts import SCREEN_SIZE
 
 FRAMES = 24
@@ -14,6 +14,7 @@ class Explosion(BaseEntity):
         super().__init__(sprite=load_sprite_alpha("explosion"), position=position)
 
         self.time = 0.0
+        load_sound("explosion.mp3").play()
 
     def tick(self, deltaTime: float):
         self.time += deltaTime

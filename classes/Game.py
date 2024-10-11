@@ -12,7 +12,6 @@ from utils.assets import load_sound, load_sprite
 from utils.consts import SCREEN_SIZE
 
 GAME_CAPTION = "Asteroids"
-GOD_TIME = 5.0
 
 
 class Game:
@@ -33,8 +32,8 @@ class Game:
         self.clock = pygame.time.Clock()
 
         self.space_down_last_frame = False
+        self.explosions: EntitiesList[Explosion] = EntitiesList(None)
 
-        self.sound_explosion = load_sound("explosion.mp3")
         self.sound_laser = load_sound("laser.wav", 0.5)
 
         self.sound_acc = load_sound("acceleration.mp3")
@@ -50,17 +49,25 @@ class Game:
             sp = self.spaceship
 
         self.userInterface = UserInterface()
-        self.spaceship = SpaceShip(GOD_TIME)
+        self.spaceship = SpaceShip()
+        self.spaceships: EntitiesList[SpaceShip] = EntitiesList([self.spaceship])
         self.asteroids: EntitiesList[Asteroid] = EntitiesList(None)
         self.bullets: EntitiesList[Bullet] = EntitiesList(None)
         self.entities: EntitiesList[Any] = EntitiesList(
-            [self.bullets, self.spaceship, self.asteroids, self.userInterface]
+            [
+                self.bullets,
+                self.spaceships,
+                self.asteroids,
+                self.explosions,
+                self.userInterface,
+            ]
         )
 
         if isrestart:
             for asteroid in ast:
                 self.entities.append(Explosion(asteroid.position))
-            self.entities.append(Explosion(sp.position))
+            if sp.alive:
+                self.entities.append(Explosion(sp.position))
 
     @property
     def level(self):
@@ -93,7 +100,7 @@ class Game:
         accel = 0
         rot = 0
 
-        if pressed_keys[pygame.K_BACKSPACE]:
+        if pressed_keys[pygame.K_BACKSPACE] and self.spaceship.god_time == 0:
             return self.reset(True)
         if pressed_keys[pygame.K_UP]:
             accel += 1
@@ -136,8 +143,12 @@ class Game:
 
         if len(self.asteroids) == 0 and self.spaceship.god_time == 0:
             self.level += 1
-            for _ in range(self.level**2):
+            for _ in range(self.level):
                 self.asteroids.append(Asteroid.random(1.0))
+            for _ in range((self.level - 1) ** 2):
+                self.asteroids.append(Asteroid.random(0.5))
+            if self.level % 3 == 0:
+                self.asteroids.append(Asteroid.random(4.0))
 
         for asteroid in self.asteroids:
             if (
@@ -145,18 +156,18 @@ class Game:
                 and self.spaceship.alive
                 and asteroid.collides_with(self.spaceship)
             ):
-                self.sound_explosion.play()
+                self.explosions.append(Explosion(self.spaceship.position))
+                self.spaceship.alive = False
                 if self.userInterface.lives <= 0:
-                    self.spaceship.alive = False
                     self.userInterface.gameover = True
                 else:
+                    self.spaceship = SpaceShip()
+                    self.spaceships.append(self.spaceship)
                     self.userInterface.lives -= 1
-                    self.spaceship.god_time += GOD_TIME
 
             for bullet in self.bullets:
                 if bullet.alive and asteroid.collides_with(bullet):
-                    self.sound_explosion.play()
-                    self.entities.append(Explosion(asteroid.position))
+                    self.explosions.append(Explosion(asteroid.position))
                     bullet.alive = False
                     if asteroid.breakable:
                         self.asteroids.append(asteroid.split())

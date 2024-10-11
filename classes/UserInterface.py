@@ -34,14 +34,27 @@ class UserInterface:
             surface.blit(self.heart, (SCREEN_SIZE[0] - 2 * width - (i + 1) * width, 56))
 
         if self.gameover:
-            rect = self.gamefont48.get_rect("Game over")
+            GAME_OVER = "Game over"
+            RESTART = "Backspace pour relancer"
+            rect = self.gamefont48.get_rect(GAME_OVER)
             self.gamefont48.render_to(
                 surface,
                 (
                     surface.get_width() // 2 - rect.width // 2,
                     surface.get_height() // 2 - rect.height // 2,
                 ),
-                "Game over",
+                GAME_OVER,
+                (255, 0, 0),
+            )
+            rect2 = self.gamefont24.get_rect(RESTART)
+            self.gamefont24.render_to(
+                surface,
+                (
+                    surface.get_width() // 2 - rect2.width // 2,
+                    surface.get_height() // 2 + rect.height // 2,
+                )
+                + (rect.height, 0),
+                RESTART,
                 (255, 0, 0),
             )
 
