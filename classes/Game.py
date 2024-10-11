@@ -5,6 +5,7 @@ import pygame
 from classes.EntitiesList import EntitiesList
 from classes.UserInterface import UserInterface
 from entities.Asteroid import Asteroid
+from entities.Explosion import Explosion
 from entities.Missile import Bullet
 from entities.SpaceShip import SpaceShip
 from utils.assets import load_sound, load_sprite
@@ -30,13 +31,7 @@ class Game:
         self.screen = pygame.display.set_mode(SCREEN_SIZE)
         self.background = load_sprite("space")
         self.clock = pygame.time.Clock()
-        self.userInterface = UserInterface()
-        self.spaceship = SpaceShip(GOD_TIME)
-        self.asteroids: EntitiesList[Asteroid] = EntitiesList(None)
-        self.bullets: EntitiesList[Bullet] = EntitiesList(None)
-        self.entities: EntitiesList[Any] = EntitiesList(
-            [self.bullets, self.spaceship, self.asteroids, self.userInterface]
-        )
+
         self.space_down_last_frame = False
 
         self.sound_explosion = load_sound("explosion.mp3")
@@ -44,6 +39,28 @@ class Game:
 
         self.sound_acc = load_sound("acceleration.mp3")
         self.sound_state = False
+
+        self.reset(False)
+
+    def reset(self: "Game", isrestart: bool):
+        ast: Any = None
+        sp: Any = None
+        if isrestart:
+            ast = self.asteroids
+            sp = self.spaceship
+
+        self.userInterface = UserInterface()
+        self.spaceship = SpaceShip(GOD_TIME)
+        self.asteroids: EntitiesList[Asteroid] = EntitiesList(None)
+        self.bullets: EntitiesList[Bullet] = EntitiesList(None)
+        self.entities: EntitiesList[Any] = EntitiesList(
+            [self.bullets, self.spaceship, self.asteroids, self.userInterface]
+        )
+
+        if isrestart:
+            for asteroid in ast:
+                self.entities.append(Explosion(asteroid.position))
+            self.entities.append(Explosion(sp.position))
 
     @property
     def level(self):
@@ -76,6 +93,8 @@ class Game:
         accel = 0
         rot = 0
 
+        if pressed_keys[pygame.K_BACKSPACE]:
+            return self.reset(True)
         if pressed_keys[pygame.K_UP]:
             accel += 1
         if pressed_keys[pygame.K_RIGHT]:
@@ -129,6 +148,7 @@ class Game:
                 self.sound_explosion.play()
                 if self.userInterface.lives <= 0:
                     self.spaceship.alive = False
+                    self.userInterface.gameover = True
                 else:
                     self.userInterface.lives -= 1
                     self.spaceship.god_time += GOD_TIME
@@ -136,6 +156,7 @@ class Game:
             for bullet in self.bullets:
                 if bullet.alive and asteroid.collides_with(bullet):
                     self.sound_explosion.play()
+                    self.entities.append(Explosion(asteroid.position))
                     bullet.alive = False
                     if asteroid.breakable:
                         self.asteroids.append(asteroid.split())

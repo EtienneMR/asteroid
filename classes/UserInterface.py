@@ -12,9 +12,13 @@ class UserInterface:
         self.gamefont24 = pygame.freetype.Font(
             file="./assets/PressStart2P-Regular.ttf", size=24
         )
+        self.gamefont48 = pygame.freetype.Font(
+            file="./assets/PressStart2P-Regular.ttf", size=48
+        )
         self.heart = load_sprite_alpha("heart")
         self.lives = 3
         self.level = 0
+        self.gameover = False
 
     @property
     def alive(self):
@@ -28,6 +32,18 @@ class UserInterface:
         width = self.heart.get_width()
         for i in range(self.lives):
             surface.blit(self.heart, (SCREEN_SIZE[0] - 2 * width - (i + 1) * width, 56))
+
+        if self.gameover:
+            rect = self.gamefont48.get_rect("Game over")
+            self.gamefont48.render_to(
+                surface,
+                (
+                    surface.get_width() // 2 - rect.width // 2,
+                    surface.get_height() // 2 - rect.height // 2,
+                ),
+                "Game over",
+                (255, 0, 0),
+            )
 
     def tick(self, deltaTime: float):
         pass
