@@ -65,9 +65,9 @@ class Game:
 
         if isrestart:
             for asteroid in ast:
-                self.entities.append(Explosion(asteroid.position))
+                self.explosions.append(Explosion(asteroid.position))
             if sp.alive:
-                self.entities.append(Explosion(sp.position))
+                self.explosions.append(Explosion(sp.position))
 
     @property
     def level(self):
