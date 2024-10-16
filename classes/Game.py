@@ -147,6 +147,8 @@ class Game:
                 self.asteroids.append(Asteroid.random(1.0))
             for _ in range((self.level - 1) ** 2):
                 self.asteroids.append(Asteroid.random(0.5))
+            for asteroid in self.asteroids:
+                asteroid.velocity += pygame.Vector2(self.level, self.level)
             if self.level % 3 == 0:
                 self.asteroids.append(Asteroid.random(4.0))
 
@@ -169,6 +171,7 @@ class Game:
                 if bullet.alive and asteroid.collides_with(bullet):
                     self.explosions.append(Explosion(asteroid.position))
                     bullet.alive = False
+                    self.userInterface.score += int(100*asteroid.scale)
                     if asteroid.breakable:
                         self.asteroids.append(asteroid.split())
                     else:

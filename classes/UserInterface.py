@@ -18,6 +18,7 @@ class UserInterface:
         self.heart = load_sprite_alpha("heart")
         self.lives = 3
         self.level = 0
+        self.score = 0
         self.gameover = False
 
     @property
@@ -27,6 +28,9 @@ class UserInterface:
     def draw(self, surface: Surface):
         self.gamefont24.render_to(
             surface, (40, 40), f"Niveau {self.level}", (255, 0, 0)
+        )
+        self.gamefont24.render_to(
+            surface, (40, 560), f"Score {self.score}", (255, 0, 0)
         )
 
         width = self.heart.get_width()
