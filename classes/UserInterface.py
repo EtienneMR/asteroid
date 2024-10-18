@@ -17,8 +17,9 @@ class UserInterface:
         )
         self.heart = load_sprite_alpha("heart")
         self.lives = 3
-        self.level = 0
+        self.level = 5
         self.score = 0
+        self.username = ''
         self.gameover = False
 
     @property

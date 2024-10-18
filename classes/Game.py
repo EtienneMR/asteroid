@@ -1,6 +1,7 @@
 from typing import Any
 
 import pygame
+import os
 
 from classes.EntitiesList import EntitiesList
 from classes.UserInterface import UserInterface
@@ -62,6 +63,8 @@ class Game:
                 self.userInterface,
             ]
         )
+
+        self.userInterface.username = input('Enter a username to link with the score : ')
 
         if isrestart:
             for asteroid in ast:
@@ -162,6 +165,22 @@ class Game:
                 self.spaceship.alive = False
                 if self.userInterface.lives <= 0:
                     self.userInterface.gameover = True
+                    scores = open("Scores.txt", "a")
+                    with scores as file:
+                        nb_lines = sum(1 for _ in file)
+                        if nb_lines >= 10:
+                            lines = scores.readlines()
+                            score_line = 0
+                            for i in range(len(lines)):
+                                for car in lines[i]:
+                                    if car == '1' or '2' or '3' or '4' or '5' or '6' or '7' or '8' or '9' or '0':
+                                        score_line += int(car)
+                                    if score_line <= self.userInterface.score:
+                                        file.write(f'{self.userInterface.username} : {self.userInterface.score}\n')
+                                
+                    with scores as file:
+                        file.write(f'{self.userInterface.username} : {self.userInterface.score}\n')
+                    file.close()
                 else:
                     self.spaceship = SpaceShip()
                     self.spaceships.append(self.spaceship)
