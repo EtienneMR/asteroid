@@ -1,6 +1,6 @@
 import os
-from typing import Any, List
 from math import atan2, pi
+from typing import Any, List
 
 import pygame
 
@@ -189,13 +189,18 @@ class Game:
                 self.asteroids.append(Asteroid.random(4.0))
 
         for ufo in self.UFOs:
+            ufo.angle = atan2(
+                ufo.position.y - self.spaceship.position.y,
+                self.spaceship.position.x - ufo.position.x,
+            ) * (180 / pi)
+            ufo.velocity = ufo.velocity * 0.99 + ufo.orientation * 5
             ufo.next_shot -= deltaTime
             if ufo.next_shot < 0:
                 ufo.next_shot += ufo.SHOT_EVERY
                 self.bullets.append(
                     Bullet(
                         ufo.position,
-                        atan2(ufo.position.y - self.spaceship.position.y, self.spaceship.position.x - ufo.position.x) * (180/pi),
+                        ufo.angle,
                         ufo.velocity.magnitude(),
                         False,
                     )
