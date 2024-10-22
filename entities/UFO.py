@@ -2,12 +2,15 @@ from random import randint
 
 from pygame import Vector2
 
+from entities.Asteroid import Asteroid
 from entities.BaseEntity import BaseEntity
 from utils.assets import load_sprite_alpha
 from utils.consts import SCREEN_SIZE
 
 
-class Asteroid(BaseEntity):
+class UFO(BaseEntity):
+    SHOT_EVERY = 1
+
     def __init__(
         self,
         position: "Vector2",
@@ -17,7 +20,7 @@ class Asteroid(BaseEntity):
         scale: float,
     ):
         super().__init__(
-            sprite=load_sprite_alpha("asteroid"),
+            sprite=load_sprite_alpha("UFO"),
             position=position,
             angle=angle,
             ang_velocity=ang_velocity,
@@ -25,25 +28,18 @@ class Asteroid(BaseEntity):
         )
 
         self.velocity = self.orientation * lin_velocity
+        self.next_shot = self.SHOT_EVERY
 
     @property
     def breakable(self):
-        return self.scale > 0.25
+        return False
 
     def split(self):
-        self.scale /= 2
-
-        return Asteroid(
-            self.position,
-            self.angle + 180 + randint(-90, 90),
-            self.velocity.magnitude() + randint(-10, 10),
-            self.ang_velocity,
-            self.scale,
-        )
+        raise NotImplementedError("Can't split an UFO")
 
     @classmethod
     def random(cls, scale: float):
-        sprite = load_sprite_alpha("asteroid")
+        sprite = load_sprite_alpha("UFO")
         position = Vector2()
 
         if randint(0, 1) == 0:

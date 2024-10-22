@@ -17,9 +17,8 @@ class UserInterface:
         )
         self.heart = load_sprite_alpha("heart")
         self.lives = 3
-        self.level = 5
+        self.level = 1
         self.score = 0
-        self.username = ''
         self.gameover = False
 
     @property
@@ -41,6 +40,7 @@ class UserInterface:
         if self.gameover:
             GAME_OVER = "Game over"
             RESTART = "Backspace pour relancer"
+            SAVE_SCORE = "S pour sauvegarder votre score"
             rect = self.gamefont48.get_rect(GAME_OVER)
             self.gamefont48.render_to(
                 surface,
@@ -57,9 +57,18 @@ class UserInterface:
                 (
                     surface.get_width() // 2 - rect2.width // 2,
                     surface.get_height() // 2 + rect.height // 2,
-                )
-                + (rect.height, 0),
+                ),
                 RESTART,
+                (255, 0, 0),
+            )
+            rect3 = self.gamefont24.get_rect(SAVE_SCORE)
+            self.gamefont24.render_to(
+                surface,
+                (
+                    surface.get_width() // 2 - rect3.width // 2,
+                    surface.get_height() // 2 + rect.height // 2 + rect2.height,
+                ),
+                SAVE_SCORE,
                 (255, 0, 0),
             )
 
