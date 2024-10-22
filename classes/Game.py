@@ -1,5 +1,6 @@
 import os
 from typing import Any, List
+from math import atan2, pi
 
 import pygame
 
@@ -194,7 +195,7 @@ class Game:
                 self.bullets.append(
                     Bullet(
                         ufo.position,
-                        ufo.angle,
+                        atan2(ufo.position.y - self.spaceship.position.y, self.spaceship.position.x - ufo.position.x) * (180/pi),
                         ufo.velocity.magnitude(),
                         False,
                     )

@@ -9,7 +9,7 @@ from utils.consts import SCREEN_SIZE
 
 
 class UFO(BaseEntity):
-    SHOT_EVERY = 1
+    SHOT_EVERY = 4
 
     def __init__(
         self,
